@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <time.h>
 #include <math.h>
 #include <GL/glut.h>
@@ -15,7 +14,7 @@ float center = 0;
 float pullDown = 0;
 float cameraAngle = 0;
 unsigned int gen = 0;
-bool*** state;
+unsigned char*** state;
 float* hues;
 GLfloat lColors[] = {0.3, 0.3, 0.3};
 GLfloat lPos[] = {0.0, 90.0, 0.0, 0.0};
@@ -46,7 +45,7 @@ void reshape(int w, int h) {
 }
 
 void moveStateDown() {
-  bool** bottom = state[0];
+  unsigned char** bottom = state[0];
   float bottomHue = hues[0];
   for (unsigned int y = 0; y < HEIGHT-1; y++) {
     state[y] = state[y+1];
@@ -57,8 +56,8 @@ void moveStateDown() {
   hues[HEIGHT-1] = bottomHue;
 }
 
-bool nextState(unsigned int y, unsigned int x, unsigned int z) {
-  bool** current = state[y];
+unsigned char nextState(unsigned int y, unsigned int x, unsigned int z) {
+  unsigned char** current = state[y];
   int neighbors = current[(SIZE+x-1) % SIZE][(SIZE+z-1) % SIZE]
     + current[(SIZE+x-1) % SIZE][z]
     + current[(SIZE+x-1) % SIZE][(SIZE+z+1) % SIZE]
@@ -68,7 +67,7 @@ bool nextState(unsigned int y, unsigned int x, unsigned int z) {
     + current[(SIZE+x+1) % SIZE][z]
     + current[(SIZE+x+1) % SIZE][(SIZE+z+1) % SIZE];
 
-  return ((current[x][z] && (neighbors == 2 || neighbors == 3)) || (!current[x][y] && neighbors == 3)) ? true : false;
+  return (current[x][z] && (neighbors == 2 || neighbors == 3)) || (!current[x][y] && neighbors == 3);
 }
 
 void randomize(unsigned int y, unsigned int chance) {
@@ -155,15 +154,15 @@ int main(int argc, char **argv) {
   totalSpace = CUBE + PADDING;
   center = (SIZE*(totalSpace))/2;
 
-  state = malloc(sizeof(bool**) * HEIGHT);
+  state = malloc(sizeof(unsigned char**) * HEIGHT);
   hues = malloc(sizeof(float) * HEIGHT);
   for (unsigned int y = 0; y < HEIGHT; y++) {
     hues[y] = y*(720/HEIGHT);
-    state[y] = malloc(sizeof(bool*) * SIZE);
+    state[y] = malloc(sizeof(unsigned char*) * SIZE);
     for (unsigned int x = 0; x < SIZE; x++) {
-      state[y][x] = malloc(sizeof(bool) * SIZE);
+      state[y][x] = malloc(sizeof(unsigned char) * SIZE);
       for (unsigned int z = 0; z < SIZE; z++) {
-        state[y][x][z] = false;
+        state[y][x][z] = 0;
       }
     }
   }
